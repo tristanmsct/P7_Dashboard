@@ -1,48 +1,65 @@
+# Bibliotèques
 import pandas as pd
 import numpy as np
 import streamlit as st
-#import requests
+import requests
 #from lime import lime_tabular
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
-def request_prediction(model_uri, data):
-    headers = {"Content-Type": "application/json"}
+# Données et modèle
+df = pd.read_csv('/Users/anne/DS7Dashboard/data/DS7 dfJointé.csv')
+model_uri = 'http://localhost:8888/edit/DS7Dashboard/model-Copy1.pkl'
+
+
+def request_prediction(model_uri, clientID):
+    dfclient = df.loc[df['SK_ID_CURR'] == clientID]
+    
+    feats = [f for f in df.columns if f not in ['TARGET','SK_ID_CURR','SK_ID_BUREAU','SK_ID_PREV']]
+    X = dfclient[feats].values 
+    y = dfclient['TARGET'].values
+    
+    model = pickle.load(open('model-Copy1.pkl', 'rb'))
+    result = model.predict_proba(X)
+    
+    if response.status_code != 200:
+        raise Exception(
+            "Request failed with status {}, {}".format(response.status_code, response.text))
+        
+    return result[:,0]
 
     data_json = {'data': data}
     response = requests.request(
         method='POST', headers=headers, url=model_uri, json=data_json)
 
-    if response.status_code != 200:
-        raise Exception(
-            "Request failed with status {}, {}".format(response.status_code, response.text))
+    
 
     return response.json()
 
 
-
-#MLFLOW_URI = 'http://127.0.0.1:5000/invocations'
-
-
-
-df = pd.read_csv("DS7 dfJointé.csv")
-client = df.loc[df['SK_ID_CURR']==100011]
-
-# Creation des onglets
+# Création des onglets
 tab1, tab2= st.tabs(["Prêt", "Informations client"])
 
-# Onglet 1
+# -----------------------------------------------------------------------
+# Onglet 1 : Score du client via algorithme et API
+
 with tab1:
     st.title('Attribution de prêt')
 
     ID_Client = st.number_input('Identifiant client', min_value=0, step=1, value=100011)
+    clientID = df.loc[df['SK_ID_CURR'] == ID_Client]
+
+    predict_btn = st.button('Prédire')
+    if predict_btn:
+        data = ID_Client
+        pred = request_prediction(model_uri, client)
     
     col1, col2, col3 = st.columns([4, 1, 4])
 
     with col1:
     # jauge
         st.subheader('Score')
-        value = 80
+        value = 80 # pred
         fig = go.Figure(go.Indicator(
         domain = {'x': [0, 1], 'y': [0, 1]},
         value = value,
@@ -65,7 +82,9 @@ with tab1:
             decision = "prêt refusé"
         st.metric(label = '',value =decision)
 
-# Onglet 2
+# -----------------------------------------------------------------------
+# Onglet 2: visualisation d'info sur le client, d'après dataset en local
+
 with tab2:
     st.header("Infos client")
     yes = df.loc[df['TARGET']==0]
