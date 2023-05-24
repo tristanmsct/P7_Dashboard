@@ -6,36 +6,14 @@ import requests
 #from lime import lime_tabular
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+import json
 
-# Données et modèle
-df = pd.read_csv('/Users/anne/DS7Dashboard/data/DS7 dfJointé.csv')
-model_uri = 'http://localhost:8888/edit/DS7Dashboard/model-Copy1.pkl'
-
-
-def request_prediction(model_uri, clientID):
-    dfclient = df.loc[df['SK_ID_CURR'] == clientID]
+def request_prediction(idClient) : 
+    request = requests.post(url="http://127.0.0.1:8000/prediction",
+                        data=json.dumps({'idClient': idClient}),
+                        headers={"Content-Type": "application/json"})
     
-    feats = [f for f in df.columns if f not in ['TARGET','SK_ID_CURR','SK_ID_BUREAU','SK_ID_PREV']]
-    X = dfclient[feats].values 
-    y = dfclient['TARGET'].values
-    
-    model = pickle.load(open('model-Copy1.pkl', 'rb'))
-    result = model.predict_proba(X)
-    
-    if response.status_code != 200:
-        raise Exception(
-            "Request failed with status {}, {}".format(response.status_code, response.text))
-        
-    return result[:,0]
-
-    data_json = {'data': data}
-    response = requests.request(
-        method='POST', headers=headers, url=model_uri, json=data_json)
-
-    
-
-    return response.json()
-
+    return request.json()
 
 # Création des onglets
 tab1, tab2= st.tabs(["Prêt", "Informations client"])
@@ -46,20 +24,21 @@ tab1, tab2= st.tabs(["Prêt", "Informations client"])
 with tab1:
     st.title('Attribution de prêt')
 
-    ID_Client = st.number_input('Identifiant client', min_value=0, step=1, value=100011)
-    clientID = df.loc[df['SK_ID_CURR'] == ID_Client]
+    idClient = st.number_input('Identifiant client', min_value=0, step=1, value=263934)
 
-    predict_btn = st.button('Prédire')
+    predict_btn = st.button('Prédire')   
+    pred = 0
+    
     if predict_btn:
-        data = ID_Client
-        pred = request_prediction(model_uri, client)
+        data = idClient
+        pred = request_prediction(idClient)['resultat']
     
     col1, col2, col3 = st.columns([4, 1, 4])
 
     with col1:
     # jauge
         st.subheader('Score')
-        value = 80 # pred
+        value = pred
         fig = go.Figure(go.Indicator(
         domain = {'x': [0, 1], 'y': [0, 1]},
         value = value,
