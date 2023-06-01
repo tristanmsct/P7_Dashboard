@@ -1,11 +1,12 @@
-# Bibliotèques
+# Bibliothèques
 import pandas as pd
 import numpy as np
 import streamlit as st
 import requests
-#from lime import lime_tabular
+from lime import lime_tabular
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+import pickle
 import json
 
 def request_prediction(idClient) : 
@@ -14,6 +15,10 @@ def request_prediction(idClient) :
                         headers={"Content-Type": "application/json"})
     
     return request.json()
+
+# Données       
+df = pd.read_csv('dataReduced.csv')
+model = pickle.load(open('model.pkl', 'rb'))
 
 # Création des onglets
 tab1, tab2= st.tabs(["Prêt", "Informations client"])
@@ -31,9 +36,10 @@ with tab1:
     
     if predict_btn:
         data = idClient
-        pred = request_prediction(idClient)['resultat']
+        pred = request_prediction(idClient)
+        #pred = res['resultat']   
     
-    col1, col2, col3 = st.columns([4, 1, 4])
+    col1, col2, col3 = st.columns([2, 1, 6])
 
     with col1:
     # jauge
@@ -53,14 +59,28 @@ with tab1:
         st.plotly_chart(fig, use_container_width=True)
 
     with col3:
-    # metrics
+    # lime
+        st.subheader('Importances')
+        # Définir l'explainer
+        feats = [f for f in df.columns if f not in ['TARGET','SK_ID_CURR','SK_ID_BUREAU','SK_ID_PREV']]
+        X = df[feats].values 
+        explainer = lime_tabular.LimeTabularExplainer(X, mode="classification",feature_names=feats)
+        # L'appliquer à la ligne d'index de l'idClient
+        idx = df.index[df["SK_ID_CURR"] == idClient]
+        exp = explainer.explain_instance(X[idx][0], model.predict_proba)
+        # graphique
+        fig2 = exp.as_pyplot_figure()
+        st.pyplot(fig2, use_container_width=True)
+        
+    with st.container(): 
+        # metrics
         st.subheader('Decision')
         if value >70:
             decision = "prêt accordé"
         else :
             decision = "prêt refusé"
-        st.metric(label = '',value =decision)
-
+        st.metric(label = '.',value = decision)
+        
 # -----------------------------------------------------------------------
 # Onglet 2: visualisation d'info sur le client, d'après dataset en local
 
@@ -68,7 +88,7 @@ with tab2:
     st.header("Infos client")
     yes = df.loc[df['TARGET']==0]
     no = df.loc[df['TARGET']==1]
-    client = df.loc[df['SK_ID_CURR']==ID_Client]
+    client = df.loc[df['SK_ID_CURR']==idClient]
 
     col1, col2 = st.columns(2)
 
@@ -102,7 +122,7 @@ with tab2:
             st.pyplot(fig4)
 
 
-with st.container():
+    with st.container():
         col5, col6 = st.columns(2)
 
         with col5:
@@ -122,23 +142,3 @@ with st.container():
             bx.scatter(client['AMT_INCOME_TOTAL'],client['AMT_CREDIT'], color='red', s=5)
             st.pyplot(fig6)
             
-
-
-
-
-#predict_btn = st.button('Prédire')
-    
-#if predict_btn:
-#data = [SK_ID_CURR]
-        
-#pred = request_prediction(MLFLOW_URI, data)[0] * 100000
-        
-#st.write(
-#'Votre score auprès de notre banque est de {:.2f}'.format(pred))
-
-
-
-
-
-
-
