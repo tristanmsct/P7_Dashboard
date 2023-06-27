@@ -46,7 +46,7 @@ with tab1:
         value = pred
         fig = go.Figure(go.Indicator(
         domain = {'x': [0, 1], 'y': [0, 1]},
-        value = value,
+        value = value * 100,
         mode = "gauge+number",
         gauge = {'axis': {'range': [None, 100]},
              'steps' : [
