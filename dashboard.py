@@ -14,7 +14,7 @@ def request_prediction(idClient) :
                         data=json.dumps({'idClient': idClient}),
                         headers={"Content-Type": "application/json"})
     
-    return request.json()
+    return request.json()['resultat']
 
 # Données       
 df = pd.read_csv('dataReduced.csv')
@@ -37,8 +37,6 @@ with tab1:
     if predict_btn:
         data = idClient
         pred = request_prediction(idClient)
-        st.write(pred)
-        pred = res['resultat']
         st.write(pred)
     
     col1, col2, col3 = st.columns([2, 1, 6])
