@@ -10,7 +10,7 @@ import pickle
 import json
 
 def request_prediction(idClient) : 
-    request = requests.post(url="https://dashboard.heroku.com/apps/myappannepierce2",
+    request = requests.post(url="https://myappannepierce2.herokuapp.com/prediction",
                         data=json.dumps({'idClient': idClient}),
                         headers={"Content-Type": "application/json"})
     
