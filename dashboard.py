@@ -38,7 +38,8 @@ with tab1:
         data = idClient
         pred = request_prediction(idClient)
         st.write(pred)
-        #pred = res['resultat']   
+        pred = res['resultat']
+        st.write(pred)
     
     col1, col2, col3 = st.columns([2, 1, 6])
 
