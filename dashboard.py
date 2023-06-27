@@ -37,7 +37,7 @@ with tab1:
     if predict_btn:
         data = idClient
         pred = request_prediction(idClient)
-        #pred = res['resultat']   
+        pred = res['resultat']   
     
     col1, col2, col3 = st.columns([2, 1, 6])
 
