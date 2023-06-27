@@ -37,7 +37,6 @@ with tab1:
     if predict_btn:
         data = idClient
         pred = request_prediction(idClient)
-        st.write(pred)
     
     col1, col2, col3 = st.columns([2, 1, 6])
 
@@ -51,9 +50,9 @@ with tab1:
         mode = "gauge+number",
         gauge = {'axis': {'range': [None, 100]},
              'steps' : [
-                 {'range': [0, 50], 'color': "red"},
-                 {'range': [50, 75], 'color': "orange"},
-                 {'range': [75, 100], 'color': "green"}],
+                 {'range': [0, 0.50], 'color': "red"},
+                 {'range': [0.50, 0.75], 'color': "orange"},
+                 {'range': [0.75, 0.100], 'color': "green"}],
              'threshold' : {'line': {'color': "blue", 'width': 4}, 'thickness': 0.75, 'value': value}}))
 
         st.plotly_chart(fig, use_container_width=True)
@@ -75,7 +74,7 @@ with tab1:
     with st.container(): 
         # metrics
         st.subheader('Decision')
-        if value >70:
+        if value > 0.70:
             decision = "prêt accordé"
         else :
             decision = "prêt refusé"
