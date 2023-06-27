@@ -50,9 +50,9 @@ with tab1:
         mode = "gauge+number",
         gauge = {'axis': {'range': [None, 100]},
              'steps' : [
-                 {'range': [0, 0.50], 'color': "red"},
-                 {'range': [0.50, 0.75], 'color': "orange"},
-                 {'range': [0.75, 0.100], 'color': "green"}],
+                 {'range': [0, 50], 'color': "red"},
+                 {'range': [50, 75], 'color': "orange"},
+                 {'range': [75, 100], 'color': "green"}],
              'threshold' : {'line': {'color': "blue", 'width': 4}, 'thickness': 0.75, 'value': value}}))
 
         st.plotly_chart(fig, use_container_width=True)
@@ -75,9 +75,9 @@ with tab1:
         # metrics
         st.subheader('Decision')
         if value > 0.70:
-            decision = "prêt accordé"
-        else :
             decision = "prêt refusé"
+        else :
+            decision = "prêt accordé"
         st.metric(label = '.',value = decision)
         
 # -----------------------------------------------------------------------
